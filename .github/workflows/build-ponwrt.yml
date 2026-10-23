@@ -208,9 +208,9 @@ jobs:
         uses: actions/checkout@v5
         with:
           # 不持久化凭据：checkout 会把 http.https://github.com/.extraheader
-          # 写进【本地】.git/config，那个头带的是仅本仓库权限的 GITHUB_TOKEN，
+          # 写进【本地】.git/config，那个头带的是仅本仓库权限的 GH_TOKEN，
           # 会盖掉凭证步骤注入的 PAT，导致私有仓库 404（本流程无 git push，
-          # 后续只用 gh CLI + env 里的 GITHUB_TOKEN，不需要 git 持久化凭据）
+          # 后续只用 gh CLI + env 里的 GH_TOKEN，不需要 git 持久化凭据）
           persist-credentials: false
 
       # =========================================================
@@ -355,7 +355,7 @@ jobs:
       #   2) 没装 App 的 fork 在「后端仓库是公开」的情况下照样能跑；
       #   3) 令牌只在真正需要时才存在，暴露面最小。
       # 探测必须真匿名：此时 GIT_ASKPASS 尚未设置，且 checkout 已用
-      # persist-credentials: false，git 里没有本仓库的 GITHUB_TOKEN 头。
+      # persist-credentials: false，git 里没有本仓库的 GH_TOKEN 头。
       # ---------------------------------------------------------
       - name: Probe FTTR repos visibility
         id: probe
@@ -853,7 +853,7 @@ jobs:
         id: release-restore
         continue-on-error: true
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           cd "$BUILD_ROOT/openwrt"
 
@@ -982,7 +982,7 @@ jobs:
       - name: Save toolchain to Release backup
         if: steps.toolchain.outputs.need_save_release == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           cd "$BUILD_ROOT/openwrt"
 
@@ -1169,7 +1169,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: steps.tag.outputs.status == 'success'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           tag_name: ${{ steps.tag.outputs.release_tag }}
           body_path: release.txt
@@ -1196,7 +1196,7 @@ jobs:
         if: steps.compile.outputs.status == 'success'
         uses: Mattraks/delete-workflow-runs@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN }}
           retain_days: 7
           keep_minimum_runs: 10
 
@@ -1208,4 +1208,4 @@ jobs:
           delete_tags: true
           delete_tag_pattern: '^${{ env.DEVICE_NAME }}-'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
